@@ -1,0 +1,14 @@
+FROM golang:1.26-alpine
+
+WORKDIR /backend-go
+
+RUN apk add --no-cache git
+
+# Instala o Air (Go está disponível aqui)
+RUN go install github.com/air-verse/air@latest
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+# O source virá pelo volume bind mount do compose
+CMD ["air"]
