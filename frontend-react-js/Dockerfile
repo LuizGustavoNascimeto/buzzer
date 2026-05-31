@@ -1,4 +1,4 @@
-FROM node:25.9.0
+FROM node:25.9.0-trixie-slim
 
 ENV PORT=3000
 
