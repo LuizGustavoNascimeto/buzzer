@@ -1,10 +1,19 @@
 services:
   backend-go:
     environment:
-      FRONTEND_URL: "http://localhost:3000"
-      BACKEND_URL: "http://localhost:8080"
-      PORT: 8080
-    build: 
+      # Pega do .env local ou da VPS. Se não achar, usa o padrão mapeado após ':-'
+      APP_ENV: "${APP_ENV:-local}"
+      FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
+      BACKEND_URL: "${BACKEND_URL:-http://localhost:8080}"
+      PORT: "${PORT:-8080}"
+
+      # Variáveis do Honeycomb / OpenTelemetry
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-https://api.honeycomb.io}"
+      OTEL_EXPORTER_OTLP_HEADERS: "${OTEL_EXPORTER_OTLP_HEADERS}" # Chave sensível (melhor vir estrito do ambiente/.env)
+      OTEL_SERVICE_NAME: "${OTEL_SERVICE_NAME:-backend-go}"
+
+      
+    build:
       context: ./backend-go
       dockerfile: Dockerfile.dev
     ports:
@@ -12,18 +21,52 @@ services:
     volumes:
       - ./backend-go:/backend-go
     command: air
+    networks:
+      - internal-network
 
   frontend-react-js:
     environment:
-      REACT_APP_BACKEND_URL: "http://localhost:8080"
+      # O React aponta para a nova porta do Back
+      REACT_APP_BACKEND_URL: "${BACKEND_URL:-http://localhost:8080}"
     build: ./frontend-react-js
     ports:
       - "3000:3000"
     volumes:
       - ./frontend-react-js:/frontend-react-js
       - /frontend-react-js/node_modules
+    networks:
+      - internal-network
+  dynamodb-local:
+    # https://stackoverflow.com/questions/67533058/persist-local-dynamodb-data-in-volumes-lack-permission-unable-to-open-databa
+    # We needed to add user:root to get this working.
+    user: root
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  db:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
 
+# the name flag is a hack to change the default prepend folder
+# name when outputting the image names
 networks:
   internal-network:
     driver: bridge
-    name: buzzer
+    name: cruddur
+
+volumes:
+  db:
+    driver: local
+# ... resto dos serviços (dynamodb, db, networks, volumes) continuam iguais
