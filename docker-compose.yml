@@ -1,7 +1,6 @@
 services:
   backend-go:
     environment:
-      # Pega do .env local ou da VPS. Se não achar, usa o padrão mapeado após ':-'
       APP_ENV: "${APP_ENV:-local}"
       FRONTEND_URL: "${FRONTEND_URL:-http://localhost:3000}"
       BACKEND_URL: "${BACKEND_URL:-http://localhost:8080}"
@@ -12,7 +11,6 @@ services:
       OTEL_EXPORTER_OTLP_HEADERS: "${OTEL_EXPORTER_OTLP_HEADERS}" # Chave sensível (melhor vir estrito do ambiente/.env)
       OTEL_SERVICE_NAME: "${OTEL_SERVICE_NAME:-backend-go}"
 
-      
     build:
       context: ./backend-go
       dockerfile: Dockerfile.dev
@@ -26,7 +24,6 @@ services:
 
   frontend-react-js:
     environment:
-      # O React aponta para a nova porta do Back
       REACT_APP_BACKEND_URL: "${BACKEND_URL:-http://localhost:8080}"
     build: ./frontend-react-js
     ports:

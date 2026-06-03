@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ActivitiesHandler struct {
@@ -15,6 +17,9 @@ func NewActivitiesHandler(service *ActivitiesService) *ActivitiesHandler {
 }
 
 func (h *ActivitiesHandler) ListActivities(c *gin.Context) {
+	span := trace.SpanFromContext(c.Request.Context())
+	span.SetAttributes(attribute.String("feed.type", "home"))
+
 	activities, err := h.service.FindActivities(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -25,6 +30,12 @@ func (h *ActivitiesHandler) ListActivities(c *gin.Context) {
 }
 
 func (h *ActivitiesHandler) ListNotifications(c *gin.Context) {
+	span := trace.SpanFromContext(c.Request.Context())
+	span.SetAttributes(
+		attribute.String("feed.type", "notifications"),
+		attribute.String("user.handle", "Andrew Brown"),
+	)
+
 	notifications, err := h.service.FindActivitiesByHandle((c.Request.Context()), "Andrew Brown")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

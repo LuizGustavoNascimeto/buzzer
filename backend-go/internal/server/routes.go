@@ -4,13 +4,16 @@ import (
 	"net/http"
 
 	"backend-go/internal/domain/activities"
+	"backend-go/internal/observability"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
+	r.Use(otelgin.Middleware(observability.ServiceName()))
 
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins: true,

@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"backend-go/internal/observability"
 	"backend-go/internal/server"
 )
 
@@ -38,6 +39,18 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	otelShutdown, err := observability.Setup(context.Background())
+	if err != nil {
+		log.Printf("OpenTelemetry setup failed: %v", err)
+	} else {
+		defer func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := otelShutdown(ctx); err != nil {
+				log.Printf("OpenTelemetry shutdown failed: %v", err)
+			}
+		}()
+	}
 
 	server := server.NewServer()
 
@@ -47,7 +60,7 @@ func main() {
 	// Run graceful shutdown in a separate goroutine
 	go gracefulShutdown(server, done)
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}

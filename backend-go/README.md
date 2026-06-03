@@ -37,3 +37,11 @@ Clean up binary from the last build:
 ```bash
 make clean
 ```
+
+## OpenTelemetry (Honeycomb)
+
+Set these environment variables before running the API to export traces:
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT` (example: `https://api.honeycomb.io`)
+- `OTEL_EXPORTER_OTLP_HEADERS` (example: `x-honeycomb-team=YOUR_API_KEY`)
+- `OTEL_SERVICE_NAME` (example: `backend-go`)
