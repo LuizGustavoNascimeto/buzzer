@@ -27,6 +27,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	activitiesService := activities.NewActivitiesService(activitiesRepo)
 	activitiesHandler := activities.NewActivitiesHandler(activitiesService)
 	r.GET("/api/activities/home", activitiesHandler.ListActivities)
+	r.GET("/api/activities/notifications", activitiesHandler.ListNotifications)
 
 	return r
 }

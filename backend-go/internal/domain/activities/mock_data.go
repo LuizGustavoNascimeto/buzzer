@@ -17,7 +17,7 @@ func NewMockActivities() []*Activity {
 		{
 			UUID:         "68f126b0-1ceb-4a33-88be-d90fa7109eee",
 			Handle:       "Andrew Brown",
-			Message:      "Cloud is fun!",
+			Message:      "Cloud is fun! #cloud #aws #azure #gcp",
 			LikesCount:   55,
 			RepliesCount: 1,
 			RepostsCount: 0,
