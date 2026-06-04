@@ -2,8 +2,11 @@ package server
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"backend-go/internal/domain/activities"
+	"backend-go/internal/logger"
 	"backend-go/internal/observability"
 
 	"github.com/gin-contrib/cors"
@@ -23,12 +26,20 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: false, // Enable cookies/auth
 	}))
 
+	cwLogger := logger.MustGetInstance(&logger.LoggerConfig{
+		Region:        os.Getenv("AWS_DEFAULT_REGION"),
+		LogGroupName:  "/buzzer/backend-go",
+		LogStreamName: "buzzer-" + time.Now().Format("2006-01-02"),
+	})
+
+	// r.Use(logger.GinCloudWatchMiddleware(cwLogger))
+
 	r.GET("/", s.HelloWorldHandler)
 	r.GET("/health", s.HealthHandler)
 
 	activitiesRepo := activities.NewMockActivitiesRepo(activities.NewMockActivities()...)
 	activitiesService := activities.NewActivitiesService(activitiesRepo)
-	activitiesHandler := activities.NewActivitiesHandler(activitiesService)
+	activitiesHandler := activities.NewActivitiesHandler(activitiesService, cwLogger)
 	r.GET("/api/activities/home", activitiesHandler.ListActivities)
 	r.GET("/api/activities/notifications", activitiesHandler.ListNotifications)
 

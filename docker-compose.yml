@@ -10,6 +10,9 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-https://api.honeycomb.io}"
       OTEL_EXPORTER_OTLP_HEADERS: "${OTEL_EXPORTER_OTLP_HEADERS}" # Chave sensível (melhor vir estrito do ambiente/.env)
       OTEL_SERVICE_NAME: "${OTEL_SERVICE_NAME:-backend-go}"
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION}"
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
 
     build:
       context: ./backend-go
