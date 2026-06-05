@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rollbar/rollbar-go"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -39,6 +40,7 @@ func (h *ActivitiesHandler) ListActivities(c *gin.Context) {
 		// 	ClientIP:   c.ClientIP(),
 		// 	Latency:    c.Request.Context().Value("latency").(string),
 		// })
+		rollbar.Error(err)
 
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -55,6 +57,7 @@ func (h *ActivitiesHandler) ListNotifications(c *gin.Context) {
 
 	notifications, err := h.service.FindActivitiesByHandle((c.Request.Context()), "Andrew Brown")
 	if err != nil {
+		rollbar.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"backend-go/internal/observability"
 	"backend-go/internal/server"
+
+	"github.com/rollbar/rollbar-go"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -39,34 +42,43 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
+	// Rollbar setup
+	rollbar.SetToken(os.Getenv("ROLLBAR_TOKEN"))
+	rollbar.SetEnvironment(os.Getenv("ROLLBAR_ENVIRONMENT"))
+	rollbar.SetServerRoot("github.com/seu-org/seu-repo")
+
+	// OTel setup
 	otelShutdown, err := observability.Setup(context.Background())
 	if err != nil {
+		rollbar.Critical(err)
 		log.Printf("OpenTelemetry setup failed: %v", err)
-	} else {
-		defer func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			if err := otelShutdown(ctx); err != nil {
-				log.Printf("OpenTelemetry shutdown failed: %v", err)
-			}
-		}()
 	}
 
-	server := server.NewServer()
-	// Adicione o middleware de logging do CloudWatch
+	rollbar.WrapAndWait(func() {
+		// OTel shutdown
+		if otelShutdown != nil {
+			defer func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				if err := otelShutdown(ctx); err != nil {
+					rollbar.Warning(err) // reporta falha no shutdown também
+					log.Printf("OpenTelemetry shutdown failed: %v", err)
+				}
+			}()
+		}
 
-	// Create a done channel to signal when the shutdown is complete
-	done := make(chan bool, 1)
+		server := server.NewServer()
+		done := make(chan bool, 1)
+		go gracefulShutdown(server, done)
+		fmt.Println(os.Getenv("ROLLBAR_ACCESS_TOKEN"))
+		err = server.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			panic(fmt.Sprintf("http server error: %s", err))
+		}
 
-	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+		<-done
+		log.Println("Graceful shutdown complete.")
+	})
 
-	err = server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
-		panic(fmt.Sprintf("http server error: %s", err))
-	}
-
-	// Wait for the graceful shutdown to complete
-	<-done
-	log.Println("Graceful shutdown complete.")
+	rollbar.Close()
 }
