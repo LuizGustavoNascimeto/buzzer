@@ -1,7 +1,10 @@
 package activities
 
 import (
+	"backend-go/internal/auth"
 	"backend-go/internal/logger"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,18 +14,28 @@ import (
 )
 
 type ActivitiesHandler struct {
-	service *ActivitiesService
-	log     *logger.CloudWatchLogger
+	service   *ActivitiesService
+	log       *logger.CloudWatchLogger
+	validator *auth.Validator
 }
 
-func NewActivitiesHandler(service *ActivitiesService, log *logger.CloudWatchLogger) *ActivitiesHandler {
+func NewActivitiesHandler(service *ActivitiesService, log *logger.CloudWatchLogger, validator *auth.Validator) *ActivitiesHandler {
 	return &ActivitiesHandler{
-		service: service,
-		log:     log,
+		service:   service,
+		log:       log,
+		validator: validator,
 	}
 }
 
 func (h *ActivitiesHandler) ListActivities(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+
+	claims, err := h.validator.ValidateToken(token)
+	if err != nil {
+		log.Fatal("não autorizado:", err)
+	}
+	fmt.Println("email", claims["email"])
+
 	// start := time.Now()
 	span := trace.SpanFromContext(c.Request.Context())
 	span.SetAttributes(attribute.String("feed.type", "home"))

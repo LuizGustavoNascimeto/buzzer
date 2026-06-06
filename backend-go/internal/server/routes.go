@@ -1,10 +1,12 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
 
+	"backend-go/internal/auth"
 	"backend-go/internal/domain/activities"
 	"backend-go/internal/logger"
 	"backend-go/internal/observability"
@@ -31,11 +33,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 		LogGroupName:  "/buzzer/backend-go",
 		LogStreamName: "buzzer-" + time.Now().Format("2006-01-02"),
 	})
+	validator, err := auth.New(os.Getenv("AWS_DEFAULT_REGION"), os.Getenv("AWS_USER_POOLS_ID"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// r.Use(logger.GinCloudWatchMiddleware(cwLogger))
 
 	api := r.Group("/api")
-	activities.RegisterRoutes(api.Group("/activities"), cwLogger)
+	activities.RegisterRoutes(api.Group("/activities"), cwLogger, validator)
 	//users.RegisterRoutes(api.Group("/users"), cwLogger)
 
 	r.GET("/", s.HelloWorldHandler)
