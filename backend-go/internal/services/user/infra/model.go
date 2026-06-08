@@ -11,6 +11,7 @@ type userModel struct {
 	gormutil.Base
 	DisplayName   string `gorm:"type:text;not null"`
 	Handle        string `gorm:"type:text;not null"`
+	Email         string `gorm:"type:text;not null"`
 	CognitoUserID string `gorm:"type:text;not null"`
 }
 

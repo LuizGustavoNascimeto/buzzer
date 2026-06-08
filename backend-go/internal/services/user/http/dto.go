@@ -9,6 +9,7 @@ import (
 
 type CreateUserRequest struct {
 	DisplayName   string `json:"display_name"    binding:"required,max=100"`
+	Email         string `json:"email"           binding:"required,max=100"`
 	Handle        string `json:"handle"          binding:"required,max=50"`
 	CognitoUserID string `json:"cognito_user_id" binding:"required"`
 }
@@ -22,6 +23,7 @@ type UpdateUserRequest struct {
 type UserResponse struct {
 	ID          string    `json:"id"`
 	DisplayName string    `json:"display_name"`
+	Email       string    `json:"email"`
 	Handle      string    `json:"handle"`
 	CreatedAt   time.Time `json:"created_at"`
 }
@@ -34,6 +36,7 @@ func toUserResponse(u *domain.User) UserResponse {
 		DisplayName: u.DisplayName,
 		Handle:      u.Handle,
 		CreatedAt:   u.CreatedAt,
+		Email:       u.Email,
 	}
 }
 

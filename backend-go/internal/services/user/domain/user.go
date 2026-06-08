@@ -9,6 +9,7 @@ type User struct {
 	ID            string
 	DisplayName   string
 	Handle        string
+	Email         string
 	CognitoUserID string
 	CreatedAt     time.Time
 }

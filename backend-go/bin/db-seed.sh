@@ -10,7 +10,7 @@ echo $seed_path
 
 if [ "$1" = "prod" ]; then
   echo "Running in production mode"
-  URL=$AWS_RDS
+  URL=$PROD_POSTGRES_URL
 else
   URL=$POSTGRES_URL
 fi

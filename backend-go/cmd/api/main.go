@@ -57,7 +57,7 @@ func main() {
 	}
 
 	//DB setup
-	conn, err := db.NewDBConn(db.DefaultConfig(), os.Getenv("POSTGRES_URL"))
+	conn, err := db.NewDBConn(db.DefaultConfig(), os.Getenv("PROD_POSTGRES_URL"))
 	if err != nil {
 		rollbar.Critical(err)
 		log.Printf("Gorm Postgres setup failed: %v", err)
