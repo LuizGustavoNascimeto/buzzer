@@ -40,7 +40,6 @@ export default function HomeFeedPage() {
     try {
       // Substitui Auth.currentAuthenticatedUser()
       const { username, userId } = await getCurrentUser();
-      console.log("user", { username, userId });
 
       // Substitui cognito_user.attributes
       const attributes = await fetchUserAttributes();
@@ -49,6 +48,7 @@ export default function HomeFeedPage() {
         display_name: attributes.name,
         handle: attributes.preferred_username,
       });
+      console.log(replyActivity);
     } catch (err) {
       console.log(err);
     }

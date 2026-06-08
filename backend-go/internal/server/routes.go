@@ -6,10 +6,12 @@ import (
 	"os"
 	"time"
 
-	"backend-go/internal/auth"
-	"backend-go/internal/domain/activities"
-	"backend-go/internal/logger"
-	"backend-go/internal/observability"
+	activityHandler "backend-go/internal/services/activity/http"
+	userHandler "backend-go/internal/services/user/http"
+
+	"backend-go/pkg/auth"
+	"backend-go/pkg/logger"
+	"backend-go/pkg/observability"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -41,7 +43,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	// r.Use(logger.GinCloudWatchMiddleware(cwLogger))
 
 	api := r.Group("/api")
-	activities.RegisterRoutes(api.Group("/activities"), cwLogger, validator)
+	activityHandler.RegisterRoutes(api.Group("/activities"), cwLogger, validator)
+	userHandler.RegisterRoutes(api.Group("/users"), cwLogger, validator)
 	//users.RegisterRoutes(api.Group("/users"), cwLogger)
 
 	r.GET("/", s.HelloWorldHandler)

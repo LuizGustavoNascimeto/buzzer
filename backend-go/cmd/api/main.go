@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"backend-go/internal/observability"
 	"backend-go/internal/server"
+	"backend-go/internal/shared/infra"
+	db "backend-go/pkg/gormutil/db"
+	"backend-go/pkg/observability"
 
 	"github.com/rollbar/rollbar-go"
 )
@@ -53,6 +55,15 @@ func main() {
 		rollbar.Critical(err)
 		log.Printf("OpenTelemetry setup failed: %v", err)
 	}
+
+	//DB setup
+	conn, err := db.NewDBConn(db.DefaultConfig(), os.Getenv("POSTGRES_URL"))
+	if err != nil {
+		rollbar.Critical(err)
+		log.Printf("Gorm Postgres setup failed: %v", err)
+	}
+
+	infra.RunMigrations(conn.Gorm)
 
 	rollbar.WrapAndWait(func() {
 		// OTel shutdown
