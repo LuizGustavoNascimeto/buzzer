@@ -6,7 +6,6 @@ import { ReactComponent as BombIcon } from "./svg/bomb.svg";
 
 export default function ActivityContent(props) {
   const format_time_created_at = (value) => {
-    // format: 2050-11-20 18:32:47 +0000
     const past = DateTime.fromISO(value);
     const now = DateTime.now();
     const diff_mins = now.diff(past, "minutes").toObject().minutes;
@@ -50,14 +49,18 @@ export default function ActivityContent(props) {
     );
   }
 
-  console.log(props.activity);
   return (
     <div className="activity_content_wrap">
       <div className="activity_avatar"></div>
       <div className="activity_content">
         <div className="activity_meta">
-          <Link className="activity_identity" to={`/@` + props.activity.user_handle}>
-            <div className="display_name">{props.activity.user_display_name}</div>
+          <Link
+            className="activity_identity"
+            to={`/@` + props.activity.user_handle}
+          >
+            <div className="display_name">
+              {props.activity.user_display_name}
+            </div>
             <div className="handle">@{props.activity.user_handle}</div>
           </Link>
           {/* activity_identity */}

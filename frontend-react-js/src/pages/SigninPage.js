@@ -2,45 +2,17 @@ import "./SigninPage.css";
 import React from "react";
 import { ReactComponent as Logo } from "../components/svg/logo.svg";
 import { Link } from "react-router-dom";
-
-// [TODO] Authenication
-import { signIn, fetchAuthSession } from "aws-amplify/auth";
+import { useSignin } from "../hooks/auth/useSignin";
 
 export default function SigninPage() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [errors, setErrors] = React.useState("");
+  const { mutate: signIn, error } = useSignin();
 
-  const onsubmit = async (event) => {
+  const handle_form = async (event) => {
     event.preventDefault();
-    setErrors("");
-
-    try {
-      const { isSignedIn, nextStep } = await signIn({
-        username: email,
-        password,
-      });
-      console.log(email, password);
-      // console.log(error);
-
-      if (nextStep.signInStep === "CONFIRM_SIGN_UP") {
-        window.location.href = "/confirm";
-        return;
-      }
-
-      if (isSignedIn) {
-        // Busca a sessão para pegar o token
-        const session = await fetchAuthSession();
-        const accessToken = session.tokens.idToken.toString();
-        localStorage.setItem("access_token", accessToken);
-        window.location.href = "/";
-      }
-    } catch (error) {
-      console.log("error signing in:", error);
-      setErrors(error.message);
-    }
-
-    return false;
+    console.log("teste")
+    signIn({ email, password });
   };
 
   const email_onchange = (event) => {
@@ -55,7 +27,7 @@ export default function SigninPage() {
         <Logo className="logo" />
       </div>
       <div className="signin-wrapper">
-        <form className="signin_form" onSubmit={onsubmit}>
+        <form className="signin_form" onSubmit={handle_form}>
           <h2>Sign into your Cruddur account</h2>
           <div className="fields">
             <div className="field text_field username">
@@ -71,7 +43,7 @@ export default function SigninPage() {
               />
             </div>
           </div>
-          {errors && <div className="errors">{errors}</div>}
+          {error && <div className="errors">{error.message}</div>}
           <div className="submit">
             <Link to="/forgot" className="forgot-link">
               Forgot Password?

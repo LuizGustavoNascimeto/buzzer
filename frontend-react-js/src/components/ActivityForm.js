@@ -1,9 +1,9 @@
 import "./ActivityForm.css";
 import React from "react";
-import process from "process";
+
 import { ReactComponent as BombIcon } from "./svg/bomb.svg";
-import { useCreateActivity } from "../hooks/useCreateActivity";
-import { useAuth } from "../hooks/useAuth";
+import { useCreateActivity } from "../hooks/acitivity/useCreateActivity";
+import { useAuth } from "../hooks/auth/useAuth";
 
 export default function ActivityForm(props) {
   const [count, setCount] = React.useState(0);
@@ -17,7 +17,9 @@ export default function ActivityForm(props) {
   }
 
   const { mutate: createActivity } = useCreateActivity();
-  const { user, token } = useAuth();
+
+  const { data: user } = useAuth();
+  //console.log(user);
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -26,7 +28,7 @@ export default function ActivityForm(props) {
         message,
         ttl,
         user_handle: user.handle,
-        authorization: token,
+        authorization: user.token,
       });
 
       setCount(0);

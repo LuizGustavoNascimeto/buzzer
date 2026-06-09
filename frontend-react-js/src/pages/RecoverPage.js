@@ -30,19 +30,20 @@ export default function RecoverPage() {
         case "DONE":
           console.log("Successfully reset password.");
           break;
+        default:
+          console.log("NÃO SEI");
       }
     } catch (error) {
       setErrors(error.message);
-    }
-    finally {
-      setFormState('confirm_code')
+    } finally {
+      setFormState("confirm_code");
     }
   };
 
   const onsubmit_confirm_code = async (event) => {
     event.preventDefault();
     setErrors("");
-    if (password == passwordAgain) {
+    if (password === passwordAgain) {
       try {
         await confirmResetPassword({ username, code, password });
       } catch (error) {
@@ -131,11 +132,11 @@ export default function RecoverPage() {
   };
 
   let form;
-  if (formState == "send_code") {
+  if (formState === "send_code") {
     form = send_code();
-  } else if (formState == "confirm_code") {
+  } else if (formState === "confirm_code") {
     form = confirm_code();
-  } else if (formState == "success") {
+  } else if (formState === "success") {
     form = success();
   }
 

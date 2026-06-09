@@ -1,24 +1,24 @@
 import "./ProfileInfo.css";
 import { ReactComponent as ElipsesIcon } from "./svg/elipses.svg";
 import React from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useSignout } from "../hooks/auth/useSignout";
 
-import { signOut as amplifySignOut } from "aws-amplify/auth";
 export default function ProfileInfo(props) {
   const [popped, setPopped] = React.useState(false);
 
   const click_pop = (event) => {
     setPopped(!popped);
   };
-  const { signOut } = useAuth();
 
   const classes = () => {
     let classes = ["profile-info-wrapper"];
-    if (popped == true) {
+    if (popped === true) {
       classes.push("popped");
     }
     return classes.join(" ");
   };
+
+  const { mutate: signOut } = useSignout();
 
   return (
     <div className={classes()}>

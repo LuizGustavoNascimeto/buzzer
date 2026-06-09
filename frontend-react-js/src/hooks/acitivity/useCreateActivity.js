@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createActivityApi } from "../api/activities";
+import { createActivityApi } from "../../api/activities";
 
 export function useCreateActivity() {
   const queryClient = useQueryClient();
