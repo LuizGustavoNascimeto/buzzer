@@ -38,7 +38,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 }
 
 func (r *UserRepository) FindByID(ctx context.Context, id string) (*domain.User, error) {
-	var model userModel
+	var model UserModel
 
 	err := r.db.WithContext(ctx).
 		Where("id = ?", id).
@@ -55,7 +55,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*domain.User,
 }
 
 func (r *UserRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
-	var models []userModel
+	var models []UserModel
 
 	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (r *UserRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
 }
 
 func (r *UserRepository) FindByHandle(ctx context.Context, handle string) (*domain.User, error) {
-	var model userModel
+	var model UserModel
 
 	err := r.db.WithContext(ctx).
 		Where("handle = ?", handle).
@@ -97,7 +97,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 	}
 
 	result := r.db.WithContext(ctx).
-		Model(&userModel{}).
+		Model(&UserModel{}).
 		Where("id = ?", user.ID).
 		Updates(toModel(user))
 
@@ -114,7 +114,7 @@ func (r *UserRepository) Update(ctx context.Context, user *domain.User) error {
 func (r *UserRepository) Delete(ctx context.Context, id string) error {
 	result := r.db.WithContext(ctx).
 		Where("id = ?", id).
-		Delete(&userModel{})
+		Delete(&UserModel{})
 
 	if result.Error != nil {
 		return result.Error

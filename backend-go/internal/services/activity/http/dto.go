@@ -1,28 +1,29 @@
 package handler
 
 import (
-	"backend-go/internal/services/activity/domain"
+	"backend-go/internal/services/activity/usecase"
 	"time"
 )
 
 // ─── requests ────────────────────────────────────────────────────────────────
 
 type CreateActivityRequest struct {
-	UserID              string     `json:"user_id"                binding:"required"`
+	UserHandle          string     `json:"user_handle"            binding:"required"`
 	Message             string     `json:"message"                binding:"required,max=500"`
 	ReplyToActivityUUID *int       `json:"reply_to_activity_uuid" binding:"omitempty"`
-	ExpiresAt           *time.Time `json:"expires_at"             binding:"omitempty"`
+	ExpiresAt           *time.Time `json:"expires_at"             binding:"required"`
 }
 
 type UpdateActivityRequest struct {
 	Message string `json:"message" binding:"required,max=500"`
 }
 
-// ─── response (domain → cliente) ─────────────────────────────────────────────
+// ─── response (usecase → cliente) ────────────────────────────────────────────
 
 type ActivityResponse struct {
 	ID                  string     `json:"id"`
-	UserID              string     `json:"user_id"`
+	UserHandle          string     `json:"user_handle"`
+	UserDisplayName     string     `json:"user_display_name"`
 	Message             string     `json:"message"`
 	RepliesCount        int        `json:"replies_count"`
 	RepostsCount        int        `json:"reposts_count"`
@@ -35,10 +36,11 @@ type ActivityResponse struct {
 
 // ─── conversões ──────────────────────────────────────────────────────────────
 
-func toActivityResponse(a *domain.Activity) ActivityResponse {
+func toActivityResponse(a *usecase.ActivityResponse) ActivityResponse {
 	return ActivityResponse{
 		ID:                  a.ID,
-		UserID:              a.UserID,
+		UserHandle:          a.UserHandle,
+		UserDisplayName:     a.UserDisplayName,
 		Message:             a.Message,
 		RepliesCount:        a.RepliesCount,
 		RepostsCount:        a.RepostsCount,
@@ -50,7 +52,7 @@ func toActivityResponse(a *domain.Activity) ActivityResponse {
 	}
 }
 
-func toActivityListResponse(activities []*domain.Activity) []ActivityResponse {
+func toActivityListResponse(activities []*usecase.ActivityResponse) []ActivityResponse {
 	result := make([]ActivityResponse, len(activities))
 	for i, a := range activities {
 		result[i] = toActivityResponse(a)

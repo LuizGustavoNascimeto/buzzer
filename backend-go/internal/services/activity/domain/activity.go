@@ -25,7 +25,7 @@ func (a *Activity) Validate() error {
 		return errors.New("message required")
 	}
 	if a.UserID == "" {
-		return errors.New("UserID required")
+		return errors.New("UserHandle required")
 	}
 	return nil
 }

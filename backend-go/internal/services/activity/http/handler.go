@@ -27,7 +27,7 @@ func (h *ActivityHandler) Create(c *gin.Context) {
 	}
 
 	activity, err := h.service.Create(c.Request.Context(), usecase.CreateActivityInput{
-		UserID:              req.UserID,
+		UserHandle:          req.UserHandle,
 		Message:             req.Message,
 		ReplyToActivityUUID: req.ReplyToActivityUUID,
 		ExpiresAt:           req.ExpiresAt,

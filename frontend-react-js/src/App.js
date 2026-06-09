@@ -1,16 +1,17 @@
 import "./App.css";
 
-import HomeFeedPage from "./pages/HomeFeedPage";
-import UserFeedPage from "./pages/UserFeedPage";
-import SignupPage from "./pages/SignupPage";
-import SigninPage from "./pages/SigninPage";
-import RecoverPage from "./pages/RecoverPage";
-import MessageGroupsPage from "./pages/MessageGroupsPage";
-import MessageGroupPage from "./pages/MessageGroupPage";
-import ConfirmationPage from "./pages/ConfirmationPage";
-import React from "react";
+import {QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import process from "process";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import ConfirmationPage from "./pages/ConfirmationPage";
+import HomeFeedPage from "./pages/HomeFeedPage";
+import MessageGroupPage from "./pages/MessageGroupPage";
+import MessageGroupsPage from "./pages/MessageGroupsPage";
+import RecoverPage from "./pages/RecoverPage";
+import SigninPage from "./pages/SigninPage";
+import SignupPage from "./pages/SignupPage";
+import UserFeedPage from "./pages/UserFeedPage";
 
 import { Amplify } from "aws-amplify";
 
@@ -60,9 +61,9 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-    </>
+    </QueryClientProvider>
   );
 }
 

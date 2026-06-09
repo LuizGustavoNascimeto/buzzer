@@ -1,6 +1,7 @@
 import "./ProfileInfo.css";
 import { ReactComponent as ElipsesIcon } from "./svg/elipses.svg";
 import React from "react";
+import { useAuth } from "../hooks/useAuth";
 
 import { signOut as amplifySignOut } from "aws-amplify/auth";
 export default function ProfileInfo(props) {
@@ -9,16 +10,7 @@ export default function ProfileInfo(props) {
   const click_pop = (event) => {
     setPopped(!popped);
   };
-
-  const signOut = async () => {
-    try {
-      await amplifySignOut({ global: true });
-      localStorage.removeItem("access_token");
-      window.location.href = "/";
-    } catch (error) {
-      console.log("error signing out: ", error);
-    }
-  };
+  const { signOut } = useAuth();
 
   const classes = () => {
     let classes = ["profile-info-wrapper"];

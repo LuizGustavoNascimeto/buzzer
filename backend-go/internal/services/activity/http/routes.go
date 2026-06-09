@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"backend-go/internal/middleware"
 	"backend-go/internal/services/activity/infra"
 	"backend-go/internal/services/activity/usecase"
+	userInfra "backend-go/internal/services/user/infra"
 	"backend-go/pkg/auth"
 	db "backend-go/pkg/gormutil/db"
 	"backend-go/pkg/logger"
@@ -18,9 +20,16 @@ func RegisterRoutes(rg *gin.RouterGroup, cwLogger *logger.CloudWatchLogger, vali
 	}
 
 	repo := infra.NewActivityRepository(conn.Gorm)
-	service := usecase.NewActivityUsecase(repo)
+	userRepo := userInfra.NewUserRepository(conn.Gorm)
+	service := usecase.NewActivityUsecase(repo, userRepo)
 	handler := NewActivityHandler(service, cwLogger)
 
 	rg.GET("/home", handler.FindByAll)
-	rg.GET("/notifications", handler.FindByHandle)
+	protected := rg.Group("")
+	protected.Use(middleware.RequireAuth(validator))
+	{
+		protected.GET("/notifications", handler.FindByHandle)
+		protected.POST("", handler.Create)
+	}
+
 }

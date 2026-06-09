@@ -8,39 +8,34 @@ import (
 	"github.com/google/uuid"
 )
 
-type activityModel struct {
+type ActivityModel struct {
 	gormutil.Base
-	UserID              uuid.UUID `gorm:"type:uuid"`
-	Message             string    `gorm:"type:text;not null"`
-	RepliesCount        int       `gorm:"default:0"`
-	RepostsCount        int       `gorm:"default:0"`
-	LikesCount          int       `gorm:"default:0"`
-	ReplyToActivityUUID int       `gorm:"type:int;"`
+	UserID              string `gorm:"type:text"`
+	Message             string `gorm:"type:text;not null"`
+	RepliesCount        int    `gorm:"default:0"`
+	RepostsCount        int    `gorm:"default:0"`
+	LikesCount          int    `gorm:"default:0"`
+	ReplyToActivityUUID int    `gorm:"type:int;"`
 	ExpiresAt           *time.Time
 }
 
-func (activityModel) TableName() string {
+func (ActivityModel) TableName() string {
 	return "activity"
 }
 
-func toModel(a *domain.Activity) *activityModel {
+func toModel(a *domain.Activity) *ActivityModel {
 	var id uuid.UUID
 	if a.ID != "" {
 		id = uuid.MustParse(a.ID)
 	}
 
-	var userID uuid.UUID
-	if a.UserID != "" {
-		userID = uuid.MustParse(a.UserID)
-	}
-
-	return &activityModel{
+	return &ActivityModel{
 		Base: gormutil.Base{
 			ID:        id,
 			CreatedAt: a.CreatedAt,
 			UpdatedAt: a.UpdatedAt,
 		},
-		UserID:              userID,
+		UserID:              a.UserID,
 		Message:             a.Message,
 		RepliesCount:        a.RepliesCount,
 		RepostsCount:        a.RepostsCount,
@@ -50,15 +45,17 @@ func toModel(a *domain.Activity) *activityModel {
 	}
 }
 
-func toDomain(m *activityModel) *domain.Activity {
+func toDomain(m *ActivityModel) *domain.Activity {
 	return &domain.Activity{
 		ID:                  m.ID.String(),
-		UserID:              m.UserID.String(),
+		UserID:              m.UserID,
 		Message:             m.Message,
 		RepliesCount:        m.RepliesCount,
 		RepostsCount:        m.RepostsCount,
 		LikesCount:          m.LikesCount,
 		ReplyToActivityUUID: m.ReplyToActivityUUID,
 		ExpiresAt:           m.ExpiresAt,
+		CreatedAt:           m.CreatedAt,
+		UpdatedAt:           m.UpdatedAt,
 	}
 }

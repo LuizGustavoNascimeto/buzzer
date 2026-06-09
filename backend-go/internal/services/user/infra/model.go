@@ -1,31 +1,33 @@
 package infra
 
 import (
+	activityInfra "backend-go/internal/services/activity/infra"
 	"backend-go/internal/services/user/domain"
 	gormutil "backend-go/pkg/gormutil/base"
 
 	"github.com/google/uuid"
 )
 
-type userModel struct {
+type UserModel struct {
 	gormutil.Base
-	DisplayName   string `gorm:"type:text;not null"`
-	Handle        string `gorm:"type:text;not null"`
-	Email         string `gorm:"type:text;not null"`
-	CognitoUserID string `gorm:"type:text;not null"`
+	DisplayName   string                        `gorm:"type:text;not null"`
+	Handle        string                        `gorm:"type:text;not null"`
+	Email         string                        `gorm:"type:text;not null"`
+	CognitoUserID string                        `gorm:"type:text;not null"`
+	Activities    []activityInfra.ActivityModel `gorm:"foreignKey:UserID"`
 }
 
-func (userModel) TableName() string {
+func (UserModel) TableName() string {
 	return "user"
 }
 
-func toModel(u *domain.User) *userModel {
+func toModel(u *domain.User) *UserModel {
 	var id uuid.UUID
 	if u.ID != "" {
 		id = uuid.MustParse(u.ID)
 	}
 
-	return &userModel{
+	return &UserModel{
 		Base: gormutil.Base{
 			ID:        id,
 			CreatedAt: u.CreatedAt,
@@ -36,7 +38,7 @@ func toModel(u *domain.User) *userModel {
 	}
 }
 
-func toDomain(m *userModel) *domain.User {
+func toDomain(m *UserModel) *domain.User {
 	return &domain.User{
 		ID:            m.ID.String(),
 		CreatedAt:     m.CreatedAt,

@@ -40,7 +40,7 @@ func (r *ActivityRepository) Create(ctx context.Context, activity *domain.Activi
 }
 
 func (r *ActivityRepository) FindByID(ctx context.Context, id string) (*domain.Activity, error) {
-	var model activityModel
+	var model ActivityModel
 
 	err := r.db.WithContext(ctx).
 		Where("id = ?", id).
@@ -57,7 +57,7 @@ func (r *ActivityRepository) FindByID(ctx context.Context, id string) (*domain.A
 }
 
 func (r *ActivityRepository) FindAll(ctx context.Context) ([]*domain.Activity, error) {
-	var models []activityModel
+	var models []ActivityModel
 
 	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (r *ActivityRepository) FindAll(ctx context.Context) ([]*domain.Activity, e
 }
 
 func (r *ActivityRepository) FindByUser(ctx context.Context, userID uuid.UUID) ([]*domain.Activity, error) {
-	var models []activityModel
+	var models []ActivityModel
 
 	err := r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
@@ -99,7 +99,7 @@ func (r *ActivityRepository) Update(ctx context.Context, activity *domain.Activi
 	}
 
 	result := r.db.WithContext(ctx).
-		Model(&activityModel{}).
+		Model(&ActivityModel{}).
 		Where("id = ?", activity.ID).
 		Updates(toModel(activity))
 
@@ -116,7 +116,7 @@ func (r *ActivityRepository) Update(ctx context.Context, activity *domain.Activi
 func (r *ActivityRepository) Delete(ctx context.Context, id string) error {
 	result := r.db.WithContext(ctx).
 		Where("id = ?", id).
-		Delete(&activityModel{})
+		Delete(&ActivityModel{})
 
 	if result.Error != nil {
 		return result.Error

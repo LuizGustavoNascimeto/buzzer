@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"backend-go/internal/services/activity/domain"
+	userDomain "backend-go/internal/services/user/domain"
+
 	"context"
 	"time"
 
@@ -15,18 +17,18 @@ import (
 var tracer = otel.Tracer("buzzer-go/activities")
 
 type IActivityService interface {
-	Create(ctx context.Context, input CreateActivityInput) (*domain.Activity, error)
-	FindByID(ctx context.Context, id string) (*domain.Activity, error)
-	FindByUser(ctx context.Context, userID uuid.UUID) ([]*domain.Activity, error)
-	FindAll(ctx context.Context) ([]*domain.Activity, error)
-	Update(ctx context.Context, input UpdateActivityInput) (*domain.Activity, error)
+	Create(ctx context.Context, input CreateActivityInput) (*ActivityResponse, error)
+	FindByID(ctx context.Context, id string) (*ActivityResponse, error)
+	FindByUser(ctx context.Context, userID uuid.UUID) ([]*ActivityResponse, error)
+	FindAll(ctx context.Context) ([]*ActivityResponse, error)
+	Update(ctx context.Context, input UpdateActivityInput) (*ActivityResponse, error)
 	Delete(ctx context.Context, id string) error
 }
 
 // ─── inputs / outputs ────────────────────────────────────────────────────────
 
 type CreateActivityInput struct {
-	UserID              string
+	UserHandle          string
 	Message             string
 	ReplyToActivityUUID *int
 	ExpiresAt           *time.Time
@@ -37,26 +39,67 @@ type UpdateActivityInput struct {
 	Message string
 }
 
+type ActivityResponse struct {
+	domain.Activity
+	UserHandle      string
+	UserDisplayName string
+}
+
 // ─── usecase ─────────────────────────────────────────────────────────────────
 
 type ActivityUsecase struct {
-	repo domain.IActivityRepository
+	repo     domain.IActivityRepository
+	userRepo userDomain.IUserRepository
 }
 
-func NewActivityUsecase(repo domain.IActivityRepository) *ActivityUsecase {
-	return &ActivityUsecase{repo: repo}
+func NewActivityUsecase(repo domain.IActivityRepository, userRepo userDomain.IUserRepository) *ActivityUsecase {
+	return &ActivityUsecase{repo: repo, userRepo: userRepo}
 }
 
-func (s *ActivityUsecase) Create(ctx context.Context, input CreateActivityInput) (*domain.Activity, error) {
+func (s *ActivityUsecase) enrich(ctx context.Context, activity *domain.Activity) (*ActivityResponse, error) {
+	user, err := s.userRepo.FindByID(ctx, activity.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return &ActivityResponse{
+		Activity:        *activity,
+		UserHandle:      user.Handle,
+		UserDisplayName: user.DisplayName,
+	}, nil
+}
+
+func (s *ActivityUsecase) enrichMany(ctx context.Context, activities []*domain.Activity) ([]*ActivityResponse, error) {
+	result := make([]*ActivityResponse, len(activities))
+	for i, a := range activities {
+		enriched, err := s.enrich(ctx, a)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = enriched
+	}
+	return result, nil
+}
+
+func (s *ActivityUsecase) Create(ctx context.Context, input CreateActivityInput) (*ActivityResponse, error) {
 	ctx, span := tracer.Start(ctx, "activities.create")
 	defer span.End()
 
-	span.SetAttributes(attribute.String("activity.user_id", input.UserID))
+	span.SetAttributes(attribute.String("activity.user_handle", input.UserHandle))
+
+	user, err := s.userRepo.FindByHandle(ctx, input.UserHandle)
+	if err != nil {
+		return nil, err
+	}
+
+	reply := 0
+	if input.ReplyToActivityUUID != nil {
+		reply = *input.ReplyToActivityUUID
+	}
 
 	activity := &domain.Activity{
-		UserID:              input.UserID,
+		UserID:              user.ID,
 		Message:             input.Message,
-		ReplyToActivityUUID: *input.ReplyToActivityUUID,
+		ReplyToActivityUUID: reply,
 		ExpiresAt:           input.ExpiresAt,
 	}
 
@@ -71,10 +114,16 @@ func (s *ActivityUsecase) Create(ctx context.Context, input CreateActivityInput)
 	}
 
 	span.SetAttributes(attribute.String("activity.id", activity.ID))
-	return activity, nil
+
+	enriched := &ActivityResponse{
+		Activity:        *activity,
+		UserHandle:      user.Handle,
+		UserDisplayName: user.DisplayName,
+	}
+	return enriched, nil
 }
 
-func (s *ActivityUsecase) FindByID(ctx context.Context, id string) (*domain.Activity, error) {
+func (s *ActivityUsecase) FindByID(ctx context.Context, id string) (*ActivityResponse, error) {
 	ctx, span := tracer.Start(ctx, "activities.find_by_id")
 	defer span.End()
 
@@ -86,10 +135,16 @@ func (s *ActivityUsecase) FindByID(ctx context.Context, id string) (*domain.Acti
 		return nil, err
 	}
 
-	return activity, nil
+	enriched, err := s.enrich(ctx, activity)
+	if err != nil {
+		recordSpanError(span, err, "err-activities-enrich")
+		return nil, err
+	}
+
+	return enriched, nil
 }
 
-func (s *ActivityUsecase) FindAll(ctx context.Context) ([]*domain.Activity, error) {
+func (s *ActivityUsecase) FindAll(ctx context.Context) ([]*ActivityResponse, error) {
 	ctx, span := tracer.Start(ctx, "activities.list")
 	defer span.End()
 
@@ -99,11 +154,17 @@ func (s *ActivityUsecase) FindAll(ctx context.Context) ([]*domain.Activity, erro
 		return nil, err
 	}
 
-	span.SetAttributes(attribute.Int("activities.count", len(activities)))
-	return activities, nil
+	result, err := s.enrichMany(ctx, activities)
+	if err != nil {
+		recordSpanError(span, err, "err-activities-enrich")
+		return nil, err
+	}
+
+	span.SetAttributes(attribute.Int("activities.count", len(result)))
+	return result, nil
 }
 
-func (s *ActivityUsecase) FindByUser(ctx context.Context, userID uuid.UUID) ([]*domain.Activity, error) {
+func (s *ActivityUsecase) FindByUser(ctx context.Context, userID uuid.UUID) ([]*ActivityResponse, error) {
 	ctx, span := tracer.Start(ctx, "activities.list_by_handle")
 	defer span.End()
 
@@ -115,11 +176,17 @@ func (s *ActivityUsecase) FindByUser(ctx context.Context, userID uuid.UUID) ([]*
 		return nil, err
 	}
 
-	span.SetAttributes(attribute.Int("activities.count", len(activities)))
-	return activities, nil
+	result, err := s.enrichMany(ctx, activities)
+	if err != nil {
+		recordSpanError(span, err, "err-activities-enrich")
+		return nil, err
+	}
+
+	span.SetAttributes(attribute.Int("activities.count", len(result)))
+	return result, nil
 }
 
-func (s *ActivityUsecase) Update(ctx context.Context, input UpdateActivityInput) (*domain.Activity, error) {
+func (s *ActivityUsecase) Update(ctx context.Context, input UpdateActivityInput) (*ActivityResponse, error) {
 	ctx, span := tracer.Start(ctx, "activities.update")
 	defer span.End()
 
@@ -143,7 +210,13 @@ func (s *ActivityUsecase) Update(ctx context.Context, input UpdateActivityInput)
 		return nil, err
 	}
 
-	return activity, nil
+	enriched, err := s.enrich(ctx, activity)
+	if err != nil {
+		recordSpanError(span, err, "err-activities-enrich")
+		return nil, err
+	}
+
+	return enriched, nil
 }
 
 func (s *ActivityUsecase) Delete(ctx context.Context, id string) error {
