@@ -59,7 +59,7 @@ func (r *ActivityRepository) FindByID(ctx context.Context, id string) (*domain.A
 func (r *ActivityRepository) FindAll(ctx context.Context) ([]*domain.Activity, error) {
 	var models []ActivityModel
 
-	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
+	if err := r.db.WithContext(ctx).Order("created_at DESC").Find(&models).Error; err != nil {
 		return nil, err
 	}
 
