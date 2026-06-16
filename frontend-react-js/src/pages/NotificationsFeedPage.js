@@ -6,16 +6,15 @@ import DesktopSidebar from "../components/DesktopSidebar";
 import ActivityFeed from "../components/ActivityFeed";
 import ActivityForm from "../components/ActivityForm";
 import ReplyForm from "../components/ReplyForm";
-import { useAuthUser } from "../hooks/useAuth";
+import { useAuth } from "../hooks/auth/useAuth";
 
 export default function NotificationsFeedPage() {
   const [activities, setActivities] = React.useState([]);
   const [popped, setPopped] = React.useState(false);
   const [poppedReply, setPoppedReply] = React.useState(false);
   const [replyActivity, setReplyActivity] = React.useState({});
-  const [user, setUser] = React.useState(null);
   const dataFetchedRef = React.useRef(false);
-  const { user, loading, error } = useAuthUser();
+  const { data: user } = useAuth();
 
   const loadData = async () => {
     try {
@@ -42,7 +41,7 @@ export default function NotificationsFeedPage() {
     dataFetchedRef.current = true;
 
     loadData();
-    checkAuth();
+    
   }, []);
 
   return (

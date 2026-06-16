@@ -1,62 +1,52 @@
-import './MessageGroupsPage.css';
+import "./MessageGroupsPage.css";
 import React from "react";
 
-import DesktopNavigation  from '../components/DesktopNavigation';
-import MessageGroupFeed from '../components/MessageGroupFeed';
-
-// [TODO] Authenication
-import Cookies from 'js-cookie'
+import DesktopNavigation from "../components/DesktopNavigation";
+import MessageGroupFeed from "../components/MessageGroupFeed";
+import { useAuth } from "../hooks/auth/useAuth";
+import { useMessageGroup } from "../hooks/messageGroups/useMessageGroups";
 
 export default function MessageGroupsPage() {
-  const [messageGroups, setMessageGroups] = React.useState([]);
   const [popped, setPopped] = React.useState([]);
-  const [user, setUser] = React.useState(null);
-  const dataFetchedRef = React.useRef(false);
 
-  const loadData = async () => {
-    try {
-      const backend_url = `${process.env.REACT_APP_BACKEND_URL}/api/message_groups`
-      const res = await fetch(backend_url, {
-        method: "GET"
-      });
-      let resJson = await res.json();
-      if (res.status === 200) {
-        setMessageGroups(resJson)
-      } else {
-        console.log(res)
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };  
+  const { data: user, isLoading: userLoading } = useAuth();
 
-  const checkAuth = async () => {
-    console.log('checkAuth')
-    // [TODO] Authenication
-    if (Cookies.get('user.logged_in')) {
-      setUser({
-        display_name: Cookies.get('user.name'),
-        handle: Cookies.get('user.username')
-      })
-    }
-  };
+const { data: messageGroups = [], isLoading: groupsLoading } =
+  useMessageGroup(user?.handle, user?.token);
 
-  React.useEffect(()=>{
-    //prevents double call
-    if (dataFetchedRef.current) return;
-    dataFetchedRef.current = true;
+  if (userLoading) {
+    return (
+      <article>
+        <div>Carregando usuário...</div>
+      </article>
+    );
+  }
 
-    loadData();
-    checkAuth();
-  }, [])
+  if (!user) {
+    return (
+      <article>
+        <div>Usuário não autenticado</div>
+      </article>
+    );
+  }
+
   return (
     <article>
-      <DesktopNavigation user={user} active={'home'} setPopped={setPopped} />
-      <section className='message_groups'>
-        <MessageGroupFeed message_groups={messageGroups} />
+      <DesktopNavigation
+        user={user}
+        active={"messages"}
+        setPopped={setPopped}
+      />
+
+      <section className="message_groups">
+        {groupsLoading ? (
+          <div>Carregando mensagens...</div>
+        ) : (
+          <MessageGroupFeed message_groups={messageGroups} />
+        )}
       </section>
-      <div className='content'>
-      </div>
+
+      <div className="content" />
     </article>
   );
 }

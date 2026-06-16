@@ -4,7 +4,7 @@ import { checkAuth } from "../../api/auth";
 export function useAuth() {
   return useQuery({
     queryKey: ["user"],
-    queryFn: checkAuth,
+    queryFn: () =>  checkAuth(),
     select: (data) => ({
       display_name: data?.attributes?.preferred_username,
       handle: data?.attributes?.name,

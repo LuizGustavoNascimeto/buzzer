@@ -14,6 +14,7 @@ import SignupPage from "./pages/SignupPage";
 import UserFeedPage from "./pages/UserFeedPage";
 
 import { Amplify } from "aws-amplify";
+import NotificationsFeedPage from "./pages/NotificationsFeedPage";
 
 Amplify.configure({
   Auth: {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
     element: <HomeFeedPage />,
   },
   {
+    path: "/notifications",
+    element: <NotificationsFeedPage />,
+  },
+  {
     path: "/@:handle",
     element: <UserFeedPage />,
   },
@@ -38,7 +43,7 @@ const router = createBrowserRouter([
     element: <MessageGroupsPage />,
   },
   {
-    path: "/messages/@:handle",
+    path: "/messages/:group_id",
     element: <MessageGroupPage />,
   },
   {

@@ -19,6 +19,7 @@ services:
       POSTGRES_URL: "${POSTGRES_URL}"
       PROD_POSTGRES_URL: "${PROD_POSTGRES_URL}"
       POSTGRES_PORT: "${POSTGRES_PORT}"
+      DYNAMO_ENDPOINT: "${DYNAMO_ENDPOINT:-http://dynamodb-local:8000}"
 
     build:
       context: ./backend-go
@@ -58,6 +59,8 @@ services:
     volumes:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
+    networks:
+      - internal-network
   db:
     image: postgres:18-alpine
     restart: always

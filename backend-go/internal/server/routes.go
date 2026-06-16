@@ -7,6 +7,7 @@ import (
 	"time"
 
 	activityHandler "backend-go/internal/services/activity/http"
+	messageHandler "backend-go/internal/services/message/http"
 	userHandler "backend-go/internal/services/user/http"
 
 	"backend-go/pkg/auth"
@@ -45,7 +46,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	api := r.Group("/api")
 	activityHandler.RegisterRoutes(api.Group("/activities"), cwLogger, validator)
 	userHandler.RegisterRoutes(api.Group("/users"), cwLogger, validator)
-	//users.RegisterRoutes(api.Group("/users"), cwLogger)
+	messageHandler.RegisterRoutes(api, cwLogger, validator)
 
 	r.GET("/", s.HelloWorldHandler)
 	r.GET("/health", s.HealthHandler)

@@ -82,7 +82,6 @@ func NewDBConn(cfg Config, dsn string) (*DB, error) {
 		instance = &DB{Gorm: db}
 		mu.Unlock()
 
-		log.Println("database: connection established successfully")
 	})
 
 	if initErr != nil {

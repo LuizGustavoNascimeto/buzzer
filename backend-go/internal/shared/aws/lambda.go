@@ -43,9 +43,9 @@ func handler(ctx context.Context, event CognitoEvent) (ret CognitoEvent, err err
 		return event, nil
 	}
 
-	displayName := attrs["name"]
+	displayName := attrs["preferred_username"]
 	email := attrs["email"]
-	handle := attrs["preferred_username"]
+	handle := attrs["name"]
 	cognitoID := attrs["sub"]
 
 	log.Printf("displayName=%s email=%s handle=%s cognitoID=%s",

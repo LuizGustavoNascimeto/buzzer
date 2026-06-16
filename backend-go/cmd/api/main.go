@@ -12,6 +12,7 @@ import (
 
 	"backend-go/internal/server"
 	"backend-go/internal/shared/infra"
+	ddb "backend-go/pkg/dynamo"
 	db "backend-go/pkg/gormutil/db"
 	"backend-go/pkg/observability"
 
@@ -60,10 +61,21 @@ func main() {
 	conn, err := db.NewDBConn(db.DefaultConfig(), os.Getenv("PROD_POSTGRES_URL"))
 	if err != nil {
 		rollbar.Critical(err)
-		log.Printf("Gorm Postgres setup failed: %v", err)
+		rollbar.Wait() // garante que o erro foi enviado antes de morrer
+		log.Fatalf("Gorm Postgres setup failed: %v", err)
 	}
-
 	infra.RunMigrations(conn.Gorm)
+
+	ctx := context.Background()
+	//DDB
+	isProd := os.Getenv("APP_ENV") == "production"
+	cfg := ddb.DefaultConfig(isProd)
+	err = ddb.Initialize(ctx, cfg)
+	if err != nil {
+		log.Fatalf("DynamoDB setup failed: %v", err)
+		rollbar.Critical(err)
+		rollbar.Wait()
+	}
 
 	rollbar.WrapAndWait(func() {
 		// OTel shutdown
@@ -83,10 +95,10 @@ func main() {
 		go gracefulShutdown(server, done)
 		fmt.Println(os.Getenv("ROLLBAR_ACCESS_TOKEN"))
 		err = server.ListenAndServe()
+		log.Printf("ListenAndServe returned: %v", err) // adiciona isso
 		if err != nil && err != http.ErrServerClosed {
 			panic(fmt.Sprintf("http server error: %s", err))
 		}
-
 		<-done
 		log.Println("Graceful shutdown complete.")
 	})

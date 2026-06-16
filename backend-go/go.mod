@@ -13,9 +13,8 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/lib/pq v1.12.3
 	github.com/rollbar/rollbar-go v1.4.8
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.69.0
 	go.opentelemetry.io/otel v1.44.0

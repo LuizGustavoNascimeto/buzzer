@@ -15,6 +15,7 @@ export default function HomeFeedPage() {
 
   const { data: activities = [] } = useActivities();
   const { data: user } = useAuth();
+ 
   console.log(user)
 
   return (
@@ -35,7 +36,7 @@ export default function HomeFeedPage() {
           activities={activities}
         />
       </div>
-      <DesktopSidebar handle={user} />
+      <DesktopSidebar handle={!!user && !!user.handle} />
     </article>
   );
 }
