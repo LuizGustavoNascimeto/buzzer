@@ -12,35 +12,29 @@ import (
 
 var tracer = otel.Tracer("buzzer-go/users")
 
+type IUserRepository interface {
+	Create(ctx context.Context, user *domain.User) error
+	FindByID(ctx context.Context, id string) (*domain.User, error)
+	FindAll(ctx context.Context) ([]domain.User, error)
+	FindByHandle(ctx context.Context, handle string) (*domain.User, error)
+	Update(ctx context.Context, user *domain.User) error
+	Delete(ctx context.Context, id string) error
+	CreateMessageUser(ctx context.Context, senderHandle string, receiverHandle string) ([]domain.MessageParticipant, error)
+}
+
 type IUserService interface {
 	Create(ctx context.Context, input CreateUserInput) (*domain.User, error)
 	FindByID(ctx context.Context, id string) (*domain.User, error)
 	FindByHandle(ctx context.Context, handle string) (*domain.User, error)
-	FindAll(ctx context.Context) ([]*domain.User, error)
+	FindAll(ctx context.Context) ([]domain.User, error)
 	Update(ctx context.Context, input UpdateUserInput) (*domain.User, error)
 	Delete(ctx context.Context, id string) error
 }
-
-// ─── inputs ──────────────────────────────────────────────────────────────────
-
-type CreateUserInput struct {
-	DisplayName   string
-	Handle        string
-	CognitoUserID string
-}
-
-type UpdateUserInput struct {
-	ID          string
-	DisplayName string
-}
-
-// ─── usecase ─────────────────────────────────────────────────────────────────
-
 type UserUsecase struct {
-	repo domain.IUserRepository
+	repo IUserRepository
 }
 
-func NewUserUsecase(repo domain.IUserRepository) *UserUsecase {
+func NewUserUsecase(repo IUserRepository) *UserUsecase {
 	return &UserUsecase{repo: repo}
 }
 
@@ -103,7 +97,7 @@ func (s *UserUsecase) FindByHandle(ctx context.Context, handle string) (*domain.
 	return user, nil
 }
 
-func (s *UserUsecase) FindAll(ctx context.Context) ([]*domain.User, error) {
+func (s *UserUsecase) FindAll(ctx context.Context) ([]domain.User, error) {
 	ctx, span := tracer.Start(ctx, "users.list")
 	defer span.End()
 

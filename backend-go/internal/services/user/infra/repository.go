@@ -54,16 +54,14 @@ func (r *UserRepository) FindByID(ctx context.Context, id string) (*domain.User,
 	return toDomain(&model), nil
 }
 
-func (r *UserRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
+func (r *UserRepository) FindAll(ctx context.Context) ([]domain.User, error) {
 	var models []UserModel
-
 	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
 		return nil, err
 	}
-
-	users := make([]*domain.User, len(models))
-	for i, m := range models {
-		users[i] = toDomain(&m)
+	users := make([]domain.User, len(models))
+	for i := range models {
+		users[i] = *toDomain(&models[i])
 	}
 	return users, nil
 }
@@ -125,49 +123,46 @@ func (r *UserRepository) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+func (r *UserRepository) CreateMessageUser(ctx context.Context, senderHandle, receiverHandle string) ([]domain.MessageParticipant, error) {
+	var rows []messageParticipantModel
 
-func (r *UserRepository) CreateMessageUser(ctx context.Context, senderHandler string, receiverHandler string) ([]*domain.CreateMessageUsers, error) {
-
-	var result []*domain.CreateMessageUsers
-
-	err := r.db.
+	err := r.db.WithContext(ctx).
 		Table("public.users").
 		Select(`
-            users.uuid,
-            users.display_name,
-            users.handle,
-            CASE users.handle = ?
-                WHEN TRUE THEN 'sender'
-                WHEN FALSE THEN 'receiver'
-                ELSE 'other'
-            END as kind
-        `, senderHandler).
-		Where(`
-            users.handle = ? OR users.handle = ?
-        `, senderHandler, receiverHandler).
-		Scan(&result).Error
+			users.uuid,
+			users.display_name,
+			users.handle,
+			CASE users.handle = ?
+				WHEN TRUE THEN 'sender'
+				WHEN FALSE THEN 'receiver'
+				ELSE 'other'
+			END as kind
+		`, senderHandle).
+		Where(`users.handle = ? OR users.handle = ?`, senderHandle, receiverHandle).
+		Scan(&rows).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return toCreateMessageUsers(rows), nil
+}
+func toCreateMessageUsers(rows []messageParticipantModel) []domain.MessageParticipant {
+	out := make([]domain.MessageParticipant, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.MessageParticipant{
+			ID:          row.ID,
+			DisplayName: row.DisplayName,
+			Handle:      row.Handle,
+			Kind:        row.Kind,
+		})
+	}
+	return out
 }
 
-// SELECT
-//   users.uuid,
-//   users.display_name,
-//   users.handle,
-//   CASE users.cognito_user_id = %(cognito_user_id)s
-//   WHEN TRUE THEN
-//     'sender'
-//   WHEN FALSE THEN
-//     'recv'
-//   ELSE
-//     'other'
-//   END as kind
-// FROM public.users
-// WHERE
-//   users.cognito_user_id = %(cognito_user_id)s
-//   OR
-//   users.handle = %(user_receiver_handle)s
+// 	FindAll(ctx context.Context) ([]domain.User, error)
+// 	FindByHandle(ctx context.Context, handle string) (*domain.User, error)
+// 	Update(ctx context.Context, user *domain.User) error
+// 	Delete(ctx context.Context, id string) error
+// 	CreateMessageUser(ctx context.Context, senderHandle string, receiverHandle string) ([]domain.MessageParticipant, error)
+// }

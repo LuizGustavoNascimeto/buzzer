@@ -1,7 +1,6 @@
 package infra
 
 import (
-	activityInfra "backend-go/internal/services/activity/infra"
 	"backend-go/internal/services/user/domain"
 	gormutil "backend-go/pkg/gormutil/base"
 
@@ -10,15 +9,21 @@ import (
 
 type UserModel struct {
 	gormutil.Base
-	DisplayName   string                        `gorm:"type:text;not null"`
-	Handle        string                        `gorm:"type:text;not null"`
-	Email         string                        `gorm:"type:text;not null"`
-	CognitoUserID string                        `gorm:"type:text;not null"`
-	Activities    []activityInfra.ActivityModel `gorm:"foreignKey:UserID"`
+	DisplayName   string `gorm:"type:text;not null"`
+	Handle        string `gorm:"type:text;not null"`
+	Email         string `gorm:"type:text;not null"`
+	CognitoUserID string `gorm:"type:text;not null"`
 }
 
 func (UserModel) TableName() string {
 	return "user"
+}
+
+type messageParticipantModel struct {
+	ID          string `gorm:"column:uuid"`
+	DisplayName string `gorm:"column:display_name"`
+	Handle      string `gorm:"column:handle"`
+	Kind        string `gorm:"column:kind"`
 }
 
 func toModel(u *domain.User) *UserModel {

@@ -18,7 +18,7 @@ type UpdateActivityRequest struct {
 	Message string `json:"message" binding:"required,max=500"`
 }
 
-// ─── response (usecase → cliente) ────────────────────────────────────────────
+// ─── response ────────────────────────────────────────────
 
 type ActivityResponse struct {
 	ID                  string     `json:"id"`
@@ -36,7 +36,7 @@ type ActivityResponse struct {
 
 // ─── conversões ──────────────────────────────────────────────────────────────
 
-func toActivityResponse(a *usecase.ActivityResponse) ActivityResponse {
+func toActivityResponse(a *usecase.ActivityOutput) ActivityResponse {
 	return ActivityResponse{
 		ID:                  a.ID,
 		UserHandle:          a.UserHandle,
@@ -52,7 +52,7 @@ func toActivityResponse(a *usecase.ActivityResponse) ActivityResponse {
 	}
 }
 
-func toActivityListResponse(activities []*usecase.ActivityResponse) []ActivityResponse {
+func toActivityListResponse(activities []*usecase.ActivityOutput) []ActivityResponse {
 	result := make([]ActivityResponse, len(activities))
 	for i, a := range activities {
 		result[i] = toActivityResponse(a)

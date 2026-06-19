@@ -5,6 +5,7 @@ import (
 
 	"backend-go/internal/services/message/domain"
 	userDomain "backend-go/internal/services/user/domain"
+	userService "backend-go/internal/services/user/usecase"
 
 	"go.opentelemetry.io/otel"
 )
@@ -29,10 +30,10 @@ type IMessageService interface {
 
 type MessageUsecase struct {
 	repo     IMessageRepository
-	userRepo userDomain.IUserRepository
+	userRepo userService.IUserRepository
 }
 
-func NewMessageUsecase(repo IMessageRepository, userRepo userDomain.IUserRepository) *MessageUsecase {
+func NewMessageUsecase(repo IMessageRepository, userRepo userService.IUserRepository) *MessageUsecase {
 	return &MessageUsecase{repo: repo, userRepo: userRepo}
 }
 
@@ -69,7 +70,7 @@ func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageI
 		return err
 	}
 
-	var myUser, otherUser *userDomain.CreateMessageUsers
+	var myUser, otherUser userDomain.MessageParticipant
 	for i := range users {
 		switch users[i].Kind {
 		case "sender":
