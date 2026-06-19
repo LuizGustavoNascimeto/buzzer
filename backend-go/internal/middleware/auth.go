@@ -15,14 +15,14 @@ func RequireAuth(validator *auth.Validator) gin.HandlerFunc {
 		// suporta "Bearer <token>" ou token direto
 		token := strings.TrimPrefix(header, "Bearer ")
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized. No token provided"})
 			return
 		}
 
 		claims, err := validator.ValidateToken(token)
 		if err != nil {
 			fmt.Println(err)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized. Invalid token provided"})
 			return
 		}
 

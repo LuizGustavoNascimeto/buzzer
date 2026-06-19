@@ -18,6 +18,7 @@ type MessageGroup struct {
 	UserID      string
 	DisplayName string
 	Handle      string
+	Content     string
 	LastMessage string
 	LastSentAt  time.Time
 }

@@ -1,7 +1,6 @@
 package handler
 
-// CreateMessageRequest é o shape exato que chega no corpo do POST.
-// json tags ficam SÓ aqui — o usecase nunca vê isso.
+// Se o grupo não existe, ira criar um grupo primeiro
 type CreateMessageRequest struct {
 	GroupID        *string `json:"message_group_uuid"`
 	SenderHandle   string  `json:"sender_handle" binding:"required"`
@@ -9,8 +8,6 @@ type CreateMessageRequest struct {
 	Content        string  `json:"message" binding:"required"`
 }
 
-// MessageResponse é o shape exato que volta no corpo da resposta.
-// Você decide aqui o que expor — não precisa ser 1:1 com domain.Message.
 type MessageResponse struct {
 	ID          string `json:"message_uuid"`
 	GroupID     string `json:"message_group_uuid"`

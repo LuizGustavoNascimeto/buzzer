@@ -118,7 +118,7 @@ Person 2: Yes, I have! I love it too. What's your favorite season?
 ` // ... resto da conversa
 
 func main() {
-	prod := false // mude para true para usar produção
+	prod := true // mude para true para usar produção
 
 	ddbClient := getDynamoClient(prod)
 

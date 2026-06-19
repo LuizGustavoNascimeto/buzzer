@@ -41,13 +41,17 @@ func (r *MessageRepository) ListMessageGroups(ctx context.Context, userID string
 	if err != nil {
 		return nil, fmt.Errorf("failed to query DynamoDB: %w", err)
 	}
-	var groups []domain.MessageGroup
+	var groups []messageGroupModel
 	err = attributevalue.UnmarshalListOfMaps(res.Items, &groups)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
 	}
+	var domainGroup []domain.MessageGroup
+	for _, group := range groups {
+		domainGroup = append(domainGroup, group.toDomain())
+	}
 
-	return groups, nil
+	return domainGroup, nil
 }
 
 func (r *MessageRepository) ListMessages(ctx context.Context, groupID string) ([]domain.Message, error) {
@@ -68,13 +72,17 @@ func (r *MessageRepository) ListMessages(ctx context.Context, groupID string) ([
 	if err != nil {
 		return nil, fmt.Errorf("failed to query DynamoDB: %w", err)
 	}
-	var messages []domain.Message
+	var messages []messageModel
 	err = attributevalue.UnmarshalListOfMaps(res.Items, &messages)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal items: %w", err)
 	}
 
-	return messages, nil
+	var domainMessage []domain.Message
+	for _, message := range messages {
+		domainMessage = append(domainMessage, message.toDomain(groupID))
+	}
+	return domainMessage, nil
 }
 
 func (r *MessageRepository) CreateMessage(ctx context.Context, msg *domain.Message) (*domain.Message, error) {
