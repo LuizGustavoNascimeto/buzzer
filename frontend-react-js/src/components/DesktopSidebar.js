@@ -16,10 +16,19 @@ export default function DesktopSidebar(props) {
 
   const users = [{ display_name: "Andrew Brown", handle: "andrewbrown" }];
 
+  const logged = () => {
+    if (user) {
+      if (user.handle) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <section>
       <Search />
-      {user.handle ? (
+      {logged() ? (
         <>
           <TrendingSection trendings={trendings} />;
           <SuggestedUsersSection users={users} />

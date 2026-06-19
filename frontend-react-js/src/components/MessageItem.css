@@ -1,62 +1,86 @@
 .message_item {
   display: flex;
-  align-items: start;
+  flex-direction: column;
+  width: fit-content;
+  max-width: min(75%, 480px);
   overflow: hidden;
-  border-bottom: solid 1px rgb(31,36,49);
-  padding: 16px;
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 6px 16px;
   cursor: pointer;
   text-decoration: none;
+  background: rgba(255,255,255,0.05);
+  border: solid 1px rgb(31,36,49);
+  align-self: flex-start;
 }
 .message_item:hover {
-background: rgba(255,255,255,0.08)
+  background: rgba(255,255,255,0.08)
 }
 
-.message_item:last-child {
-  border-bottom: none;
+/* mensagens enviadas pelo usuário logado */
+.message_item.is_own {
+  align-self: flex-end;
+  background: rgba(149,0,255,0.18);
+  border-color: rgba(149,0,255,0.4);
+}
+.message_item.is_own .message_header {
+  flex-direction: row-reverse;
+}
+.message_item.is_own .message_content {
+  padding-left: 0;
+  padding-right: 28px;
+  text-align: right;
+}
+.message_item.is_own .created_at {
+  text-align: right;
 }
 
-.message_item .message_content {
-  flex-grow: 1;
-  padding-left: 12px;
+.message_item .message_header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
 }
-
 .message_item .message_avatar {
   background: rgb(149,0,255);
-  height: 50px;
-  width: 50px;
+  height: 20px;
+  width: 20px;
   border-radius: 999px;
   flex-shrink: 0;
-  margin-right: 8px;
 }
-
-.message_item .message_meta {
-  display: flex;
-  justify-content: space-between;
-}
-
 .message_item .message_identity {
-  flex-grow: 1;
-  text-decoration: none;
-  font-size: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  overflow: hidden;
+  white-space: nowrap;
 }
-
 .message_item .message_identity .display_name {
   font-weight: 800;
   color: #fff;
-}
-
-.message_item  .message_identity .handle {
-  color: rgb(255,255,255,0.5);
-}
-
-
-.message_item .created_at {
-  color: rgb(72,77,95);
   font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.message_item .message_identity .handle {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.message_item .message_content {
+  padding-left: 28px;
+}
 .message_item .message {
   color: #fff;
   font-size: 16px;
-  margin-top: 8px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.message_item .created_at {
+  color: rgb(72,77,95);
+  font-size: 13px;
+  margin-top: 6px;
 }

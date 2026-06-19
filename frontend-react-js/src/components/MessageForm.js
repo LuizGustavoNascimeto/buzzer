@@ -16,9 +16,11 @@ export default function MessageForm(props) {
     classes.push("err");
   }
 
+  const { data: user } = useAuth();
   const { mutate: createMessage } = useCreateMessages();
 
-  const { data: user } = useAuth();
+  
+  
   const onsubmit = async (event) => {
     event.preventDefault();
 

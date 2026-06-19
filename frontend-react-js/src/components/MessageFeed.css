@@ -1,0 +1,23 @@
+.message_feed {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.message_feed_heading {
+  padding: 16px;
+  border-bottom: solid 1px rgb(31,36,49);
+}
+.message_feed_heading .title {
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.message_feed_collection {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+}

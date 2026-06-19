@@ -8,7 +8,6 @@ import MessageGroupFeed from "../components/MessageGroupFeed";
 import { useAuth } from "../hooks/auth/useAuth";
 import { useMessageGroup } from "../hooks/messageGroups/useMessageGroups";
 import { useMessage } from "../hooks/messages/useMessages";
-import MessageForm from "../components/MessageForm";
 
 export default function MessageGroupPage() {
   const [popped, setPopped] = React.useState([]);
@@ -17,7 +16,7 @@ export default function MessageGroupPage() {
 
   const { data: user, isLoading: userLoading } = useAuth();
 
-  const { data: messageGroups = [], isLoading: groupsLoading } =
+  const { data: messageGroups = [] } =
     useMessageGroup(user?.handle, user?.token);
 
   
