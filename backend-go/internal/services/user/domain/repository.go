@@ -9,4 +9,5 @@ type IUserRepository interface {
 	FindByHandle(ctx context.Context, handle string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	Delete(ctx context.Context, id string) error
+	CreateMessageUser(ctx context.Context, senderHandle string, receiverHandle string) ([]*CreateMessageUsers, error)
 }

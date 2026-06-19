@@ -29,18 +29,16 @@ func RegisterRoutes(rg *gin.RouterGroup, cwLogger *logger.CloudWatchLogger, vali
 	service := usecase.NewMessageUsecase(repo, userRepo)
 	handler := NewMessageHandler(service, cwLogger)
 
-	// rg.GET("/messages", handler.FindByAll)
 	protected := rg.Group("")
 	protected.Use(middleware.RequireAuth(validator))
 	{
 		messageRoute := protected.Group("/messages")
-		// messageRoute.POST("", handler.CreateMessage)
-		messageRoute.GET("/:group_id", handler.ListMessage)
+		messageRoute.POST("", handler.CreateMessage)
+		messageRoute.GET("/:group_id", handler.ListMessages)
 	}
 	{
 		groupRoute := protected.Group("/message_groups")
-		// groupRoute.POST("", handler.CreateMessageGroup)
-		groupRoute.GET("/:handle", handler.ListMessageGroup)
+		groupRoute.GET("/:handle", handler.ListMessageGroups)
 	}
 
 }

@@ -3,8 +3,10 @@ import Search from "../components/Search";
 import TrendingSection from "../components/TrendingsSection";
 import SuggestedUsersSection from "../components/SuggestedUsersSection";
 import JoinSection from "../components/JoinSection";
+import { useAuth } from "../hooks/auth/useAuth";
 
 export default function DesktopSidebar(props) {
+  const { data: user, isLoading: userLoading } = useAuth();
   const trendings = [
     { hashtag: "100DaysOfCloud", count: 2053 },
     { hashtag: "CloudProject", count: 8253 },
@@ -17,7 +19,7 @@ export default function DesktopSidebar(props) {
   return (
     <section>
       <Search />
-      {props.handle ? (
+      {user.handle ? (
         <>
           <TrendingSection trendings={trendings} />;
           <SuggestedUsersSection users={users} />

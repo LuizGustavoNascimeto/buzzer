@@ -3,17 +3,18 @@ import {ReactComponent as Logo} from './svg/logo.svg';
 import DesktopNavigationLink from '../components/DesktopNavigationLink';
 import CrudButton from '../components/CrudButton';
 import ProfileInfo from '../components/ProfileInfo';
+import { useAuth } from '../hooks/auth/useAuth';
 
 export default function DesktopNavigation(props) {
-
+ const { data: user, isLoading: userLoading } = useAuth();
   let button;
   let profile;
   let notificationsLink;
   let messagesLink;
   let profileLink;
-  if (props.user) {
+  if (user) {
     button = <CrudButton setPopped={props.setPopped} />;
-    profile = <ProfileInfo user={props.user} />;
+    profile = <ProfileInfo user={user} />;
     notificationsLink = <DesktopNavigationLink 
       url="/notifications" 
       name="Notifications" 

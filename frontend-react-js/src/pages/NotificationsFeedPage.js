@@ -71,7 +71,7 @@ export default function NotificationsFeedPage() {
           activities={activities}
         />
       </div>
-      <DesktopSidebar user={user} />
+      <DesktopSidebar/>
     </article>
   );
 }

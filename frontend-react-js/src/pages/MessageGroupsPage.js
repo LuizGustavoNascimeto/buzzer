@@ -11,8 +11,8 @@ export default function MessageGroupsPage() {
 
   const { data: user, isLoading: userLoading } = useAuth();
 
-const { data: messageGroups = [], isLoading: groupsLoading } =
-  useMessageGroup(user?.handle, user?.token);
+  const { data: messageGroups = [], isLoading: groupsLoading } =
+    useMessageGroup(user?.handle, user?.token);
 
   if (userLoading) {
     return (
@@ -32,11 +32,7 @@ const { data: messageGroups = [], isLoading: groupsLoading } =
 
   return (
     <article>
-      <DesktopNavigation
-        user={user}
-        active={"messages"}
-        setPopped={setPopped}
-      />
+      <DesktopNavigation active={"messages"} setPopped={setPopped} />
 
       <section className="message_groups">
         {groupsLoading ? (

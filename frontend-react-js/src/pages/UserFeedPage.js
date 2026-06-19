@@ -63,7 +63,7 @@ export default function UserFeedPage() {
         <ActivityForm popped={popped} setActivities={setActivities} />
         <ActivityFeed title={title} activities={activities} />
       </div>
-      <DesktopSidebar user={user} />
+      <DesktopSidebar />
     </article>
   );
 }

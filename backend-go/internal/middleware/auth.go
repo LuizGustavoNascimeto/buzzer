@@ -26,7 +26,13 @@ func RequireAuth(validator *auth.Validator) gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user_id", claims)
+		userID, ok := claims["sub"].(string)
+		if !ok || userID == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+
+		c.Set("user_id", userID)
 		c.Next()
 	}
 }

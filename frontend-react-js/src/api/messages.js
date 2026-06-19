@@ -1,5 +1,4 @@
-const apiBaseUrl =
-  process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+const apiBaseUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 function getAuthHeaders(token) {
   return {
     Accept: "application/json",
@@ -8,18 +7,29 @@ function getAuthHeaders(token) {
   };
 }
 
-
 export async function fetchMessages(group_id, token) {
-  const res = await fetch(
-    `${apiBaseUrl}/api/messages/${group_id}`,
-        {
-      method: "GET",
-      headers: getAuthHeaders(token),
-    }
-  );
+  const res = await fetch(`${apiBaseUrl}/api/messages/${group_id}`, {
+    method: "GET",
+    headers: getAuthHeaders(token),
+  });
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data?.message || "Erro ao buscar mensagens");
   }
+  return data;
+}
+export async function createMessageApi(message, token) {
+  const res = await fetch(`${apiBaseUrl}/api/messages`, {
+    method: "POST",
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(message),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data?.message || "Erro ao criar mensagem");
+  }
+
   return data;
 }

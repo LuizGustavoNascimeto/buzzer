@@ -36,7 +36,7 @@ export default function HomeFeedPage() {
           activities={activities}
         />
       </div>
-      <DesktopSidebar handle={!!user && !!user.handle} />
+      <DesktopSidebar/>
     </article>
   );
 }

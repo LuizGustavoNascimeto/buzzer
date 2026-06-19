@@ -125,3 +125,49 @@ func (r *UserRepository) Delete(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (r *UserRepository) CreateMessageUser(ctx context.Context, senderHandler string, receiverHandler string) ([]*domain.CreateMessageUsers, error) {
+
+	var result []*domain.CreateMessageUsers
+
+	err := r.db.
+		Table("public.users").
+		Select(`
+            users.uuid,
+            users.display_name,
+            users.handle,
+            CASE users.handle = ?
+                WHEN TRUE THEN 'sender'
+                WHEN FALSE THEN 'receiver'
+                ELSE 'other'
+            END as kind
+        `, senderHandler).
+		Where(`
+            users.handle = ? OR users.handle = ?
+        `, senderHandler, receiverHandler).
+		Scan(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+// SELECT
+//   users.uuid,
+//   users.display_name,
+//   users.handle,
+//   CASE users.cognito_user_id = %(cognito_user_id)s
+//   WHEN TRUE THEN
+//     'sender'
+//   WHEN FALSE THEN
+//     'recv'
+//   ELSE
+//     'other'
+//   END as kind
+// FROM public.users
+// WHERE
+//   users.cognito_user_id = %(cognito_user_id)s
+//   OR
+//   users.handle = %(user_receiver_handle)s

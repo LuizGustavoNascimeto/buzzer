@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
 import "./MessageGroupPage.css";
 
+import { useParams } from "react-router-dom";
 import DesktopNavigation from "../components/DesktopNavigation";
 import MessagesFeed from "../components/MessageFeed";
-import MessagesForm from "../components/MessageForm";
 import MessageGroupFeed from "../components/MessageGroupFeed";
 import { useAuth } from "../hooks/auth/useAuth";
-import { useMessage } from "../hooks/messages/useMessages";
 import { useMessageGroup } from "../hooks/messageGroups/useMessageGroups";
-import { useParams } from "react-router-dom";
+import { useMessage } from "../hooks/messages/useMessages";
+import MessageForm from "../components/MessageForm";
 
 export default function MessageGroupPage() {
   const [popped, setPopped] = React.useState([]);
@@ -56,7 +56,7 @@ export default function MessageGroupPage() {
       </section>
       <div className="content messages">
         <MessagesFeed messages={messages} />
-        {/* <MessagesForm setMessages={setMessages} /> */}
+        {/* <MessageForm setMessages={setMessages} /> */}
       </div>
     </article>
   );
