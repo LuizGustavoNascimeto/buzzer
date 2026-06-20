@@ -21,6 +21,6 @@ func RegisterRoutes(rg *gin.RouterGroup, cwLogger *logger.CloudWatchLogger, vali
 	service := usecase.NewUserUsecase(repo)
 	handler := NewUserHandler(service, cwLogger)
 
-	rg.GET("/home", handler.ListUsers)
-	rg.GET("/notifications", handler.ListByHandle)
+	rg.GET("", handler.ListUsers)
+	rg.GET("/findByHandle/:handle", handler.FindByHandle)
 }

@@ -26,42 +26,31 @@ func NewUserHandler(service usecase.IUserService, log *logger.CloudWatchLogger) 
 func (h *UserHandler) ListUsers(c *gin.Context) {
 	// start := time.Now()
 	span := trace.SpanFromContext(c.Request.Context())
-	span.SetAttributes(attribute.String("feed.type", "home"))
+	span.SetAttributes(attribute.String("feed.type", "users"))
 
-	activities, err := h.service.FindAll(c.Request.Context())
+	users, err := h.service.FindAll(c.Request.Context())
 	if err != nil {
-		// h.log.SendLog(logger.LogEntry{
-		// 	Timestamp:  c.Request.Context().Value("timestamp").(string),
-		// 	Level:      "ERROR",
-		// 	Method:     c.Request.Method,
-		// 	Path:       c.Request.URL.Path,
-		// 	StatusCode: http.StatusInternalServerError,
-		// 	Message:    "Failed to list activities",
-		// 	Error:      err.Error(),
-		// 	ClientIP:   c.ClientIP(),
-		// 	Latency:    c.Request.Context().Value("latency").(string),
-		// })
 		rollbar.Error(err)
 
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, activities)
+	c.JSON(http.StatusOK, users)
 }
 
-func (h *UserHandler) ListByHandle(c *gin.Context) {
+func (h *UserHandler) FindByHandle(c *gin.Context) {
 	span := trace.SpanFromContext(c.Request.Context())
 	span.SetAttributes(
 		attribute.String("feed.type", "notifications"),
 		attribute.String("user.handle", "Andrew Brown"),
 	)
 
-	notifications, err := h.service.FindByHandle((c.Request.Context()), "Andrew Brown")
+	user, err := h.service.FindByHandle((c.Request.Context()), c.Param("handle"))
 	if err != nil {
 		rollbar.Error(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, notifications)
+	c.JSON(http.StatusOK, toUserResponse(user))
 }

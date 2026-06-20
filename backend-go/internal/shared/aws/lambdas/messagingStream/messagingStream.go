@@ -80,7 +80,7 @@ func handler(ctx context.Context, event Event) error {
 
 	log.Printf("GRUP ===> %s %s\n", groupUUID, message)
 
-	tableName := "cruddur-messages"
+	tableName := "buzzer-messages"
 	indexName := "message-group-sk-index"
 
 	// 3. Query no GSI

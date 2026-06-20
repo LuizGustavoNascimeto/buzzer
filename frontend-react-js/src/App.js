@@ -1,6 +1,6 @@
 import "./App.css";
 
-import {QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import process from "process";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -12,6 +12,7 @@ import RecoverPage from "./pages/RecoverPage";
 import SigninPage from "./pages/SigninPage";
 import SignupPage from "./pages/SignupPage";
 import UserFeedPage from "./pages/UserFeedPage";
+import MessageGroupNewPage from "./pages/MessageGroupNewPage";
 
 import { Amplify } from "aws-amplify";
 import NotificationsFeedPage from "./pages/NotificationsFeedPage";
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/messages",
     element: <MessageGroupsPage />,
+  },
+  {
+    path: "/messages/new/:handle",
+    element: <MessageGroupNewPage />,
   },
   {
     path: "/messages/:group_id",

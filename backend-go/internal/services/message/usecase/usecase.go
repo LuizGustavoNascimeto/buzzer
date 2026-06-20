@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"backend-go/internal/services/message/domain"
 	userDomain "backend-go/internal/services/user/domain"
@@ -102,15 +103,18 @@ func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageI
 		}
 		return message, nil
 	}
+	if input.ReceiverHandle == nil {
 
-	msg := &domain.Message{
-		GroupID:     *input.GroupID,
-		SenderID:    myUser.ID,
-		DisplayName: myUser.DisplayName,
-		Handle:      myUser.Handle,
-		Content:     input.Content,
+		msg := &domain.Message{
+			GroupID:     *input.GroupID,
+			SenderID:    myUser.ID,
+			DisplayName: myUser.DisplayName,
+			Handle:      myUser.Handle,
+			Content:     input.Content,
+		}
+
+		msg, err = m.repo.CreateMessage(ctx, msg)
+		return msg, err
 	}
-
-	msg, err = m.repo.CreateMessage(ctx, msg)
-	return msg, err
+	return nil, errors.New("Not enough arguments")
 }

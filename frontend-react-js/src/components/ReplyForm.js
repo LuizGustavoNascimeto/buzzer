@@ -30,7 +30,7 @@ export default function ReplyForm(props) {
         }),
       });
       let data = await res.json();
-      if (res.status === 200) {
+      if (res.status === 201) {
         // add activity to the feed
 
         let activities_deep_copy = JSON.parse(JSON.stringify(props.activities))

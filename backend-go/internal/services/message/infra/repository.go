@@ -59,8 +59,9 @@ func (r *MessageRepository) ListMessages(ctx context.Context, groupID string) ([
 	queryInput := &dynamodb.QueryInput{
 		TableName:              aws.String(r.tableName),
 		KeyConditionExpression: aws.String("pk = :pk AND begins_with(sk, :year)"),
-		ScanIndexForward:       aws.Bool(false),
+		ScanIndexForward:       aws.Bool(true),
 		Limit:                  aws.Int32(20),
+
 		ReturnConsumedCapacity: types.ReturnConsumedCapacityTotal,
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":year": &types.AttributeValueMemberS{Value: year},
@@ -118,7 +119,10 @@ func (r *MessageRepository) CreateMessage(ctx context.Context, msg *domain.Messa
 	}, nil
 }
 
-func (r *MessageRepository) CreateMessageGroupsInBatch(ctx context.Context, my, other *usecase.CreateMessageGroupInput, message *usecase.CreateMessageInput) (*domain.Message, error) {
+func (r *MessageRepository) CreateMessageGroupsInBatch(
+	ctx context.Context,
+	my, other *usecase.CreateMessageGroupInput,
+	message *usecase.CreateMessageInput) (*domain.Message, error) {
 	now := time.Now()
 	nowStr := now.Format(time.RFC3339)
 	messageGroupUUID := uuid.New().String()
@@ -145,15 +149,13 @@ func (r *MessageRepository) CreateMessageGroupsInBatch(ctx context.Context, my, 
 	}
 
 	messageItem := map[string]types.AttributeValue{
-		"pk":                 &types.AttributeValueMemberS{Value: "MSG#" + messageGroupUUID},
-		"sk":                 &types.AttributeValueMemberS{Value: nowStr},
-		"message_uuid":       &types.AttributeValueMemberS{Value: messageUUID},
-		"message_group_uuid": &types.AttributeValueMemberS{Value: messageGroupUUID},
-		"message":            &types.AttributeValueMemberS{Value: message.Content},
-		"sender_handle":      &types.AttributeValueMemberS{Value: message.SenderHandle},
-	}
-	if message.ReceiverHandle != nil {
-		messageItem["receiver_handle"] = &types.AttributeValueMemberS{Value: *message.ReceiverHandle}
+		"pk":                &types.AttributeValueMemberS{Value: "MSG#" + messageGroupUUID},
+		"sk":                &types.AttributeValueMemberS{Value: nowStr},
+		"message_uuid":      &types.AttributeValueMemberS{Value: messageUUID},
+		"message":           &types.AttributeValueMemberS{Value: message.Content},
+		"user_uuid":         &types.AttributeValueMemberS{Value: other.OtherUserID},
+		"user_display_name": &types.AttributeValueMemberS{Value: other.OtherDisplayName},
+		"user_handle":       &types.AttributeValueMemberS{Value: other.OtherHandle},
 	}
 
 	_, err := r.ddb.TransactWriteItems(ctx, &dynamodb.TransactWriteItemsInput{
