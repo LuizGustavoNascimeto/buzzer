@@ -22,18 +22,26 @@ func NewMessageHandler(uc usecase.IMessageService, log *logger.CloudWatchLogger)
 func (h *MessageHandler) CreateMessage(c *gin.Context) {
 	var req CreateMessageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 
 	input := toCreateMessageInput(req)
 
-	if err := h.usecase.CreateMessage(c.Request.Context(), &input); err != nil {
+	res, err := h.usecase.CreateMessage(c.Request.Context(), &input)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	response := MessageResponse{
+		ID:          res.ID,
+		Content:     res.Content,
+		DisplayName: res.DisplayName,
+		Handle:      res.Handle,
+		GroupID:     res.GroupID,
+		CreatedAt:   res.SentAt.String()}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "ok"})
+	c.JSON(http.StatusCreated, response)
 }
 
 func (h *MessageHandler) ListMessages(c *gin.Context) {

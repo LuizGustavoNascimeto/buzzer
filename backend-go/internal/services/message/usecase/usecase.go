@@ -25,7 +25,7 @@ type IMessageRepository interface {
 type IMessageService interface {
 	ListMessageGroups(ctx context.Context, handle string) ([]domain.MessageGroup, error)
 	ListMessages(ctx context.Context, groupID string) ([]domain.Message, error)
-	CreateMessage(ctx context.Context, input *CreateMessageInput) error
+	CreateMessage(ctx context.Context, input *CreateMessageInput) (*domain.Message, error)
 }
 
 type MessageUsecase struct {
@@ -56,7 +56,7 @@ func (m MessageUsecase) ListMessages(ctx context.Context, groupID string) ([]dom
 	return m.repo.ListMessages(ctx, groupID)
 }
 
-func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageInput) error {
+func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageInput) (*domain.Message, error) {
 	ctx, span := tracer.Start(ctx, "messages.create")
 	defer span.End()
 
@@ -67,7 +67,7 @@ func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageI
 
 	users, err := m.userRepo.CreateMessageUser(ctx, input.SenderHandle, receiverHandle)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var myUser, otherUser userDomain.MessageParticipant
@@ -96,8 +96,11 @@ func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageI
 			OtherUserID:      myUser.ID,
 		}
 
-		_, err := m.repo.CreateMessageGroupsInBatch(ctx, groupSender, groupReceiver, input)
-		return err
+		message, err := m.repo.CreateMessageGroupsInBatch(ctx, groupSender, groupReceiver, input)
+		if err != nil {
+			return nil, err
+		}
+		return message, nil
 	}
 
 	msg := &domain.Message{
@@ -108,6 +111,6 @@ func (m MessageUsecase) CreateMessage(ctx context.Context, input *CreateMessageI
 		Content:     input.Content,
 	}
 
-	_, err = m.repo.CreateMessage(ctx, msg)
-	return err
+	msg, err = m.repo.CreateMessage(ctx, msg)
+	return msg, err
 }

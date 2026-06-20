@@ -20,7 +20,7 @@ func (UserModel) TableName() string {
 }
 
 type messageParticipantModel struct {
-	ID          string `gorm:"column:uuid"`
+	ID          string `gorm:"column:id"`
 	DisplayName string `gorm:"column:display_name"`
 	Handle      string `gorm:"column:handle"`
 	Kind        string `gorm:"column:kind"`

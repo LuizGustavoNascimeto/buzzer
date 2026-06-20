@@ -127,18 +127,18 @@ func (r *UserRepository) CreateMessageUser(ctx context.Context, senderHandle, re
 	var rows []messageParticipantModel
 
 	err := r.db.WithContext(ctx).
-		Table("public.users").
+		Table(`public."user"`).
 		Select(`
-			users.uuid,
-			users.display_name,
-			users.handle,
-			CASE users.handle = ?
+			"user".id,
+			"user".display_name,
+			"user".handle,
+			CASE "user".handle = ?
 				WHEN TRUE THEN 'sender'
 				WHEN FALSE THEN 'receiver'
 				ELSE 'other'
 			END as kind
 		`, senderHandle).
-		Where(`users.handle = ? OR users.handle = ?`, senderHandle, receiverHandle).
+		Where(`"user".handle = ? OR "user".handle = ?`, senderHandle, receiverHandle).
 		Scan(&rows).Error
 
 	if err != nil {
